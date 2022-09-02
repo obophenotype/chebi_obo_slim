@@ -1,0 +1,22 @@
+name: Create a PRO slim
+on:
+  workflow_dispatch:
+#  schedule:
+#    - cron: "0 13 * * 1"
+jobs:
+  pr_slim:
+    runs-on: ubuntu-latest
+    container: obolibrary/odklite:v1.2.30
+    strategy:
+      max-parallel: 1
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v2
+      - name: Build PRO slim
+        run: make all
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: Update PRO slim
+          title: 'Update PRO slim'
+          assignees: matentzn
