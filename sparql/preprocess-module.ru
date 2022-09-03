@@ -10,6 +10,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
 INSERT { 
     ?ontology dc:source ?version_iri .
+    ?ontology owl:versionIRI ?newVersionIRI .
 }
 
 WHERE {
@@ -18,5 +19,5 @@ WHERE {
   #OPTIONAL {
   #  ?ontology ?ontology_annotation_property ?ontology_annotation_value .
   #}
-
+  BIND(REPLACE(REPLACE(STR(?version_iri),"http://purl.obolibrary.org/obo/chebi/","http://purl.obolibrary.org/obo/chebi/obophenotype/releases/"),"chebi.owl","chebi_slim.owl") as ?newVersionIRI)
 }

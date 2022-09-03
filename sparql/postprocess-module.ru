@@ -11,6 +11,6 @@ DELETE {
 WHERE {
   ?ontology rdf:type owl:Ontology .
   ?ontology ?ontology_annotation_property ?ontology_annotation_value .
-  FILTER(?ontology_annotation_property != dc:source && ?ontology_annotation_property != rdf:type)
+  FILTER(?ontology_annotation_property != owl:versionIRI  && ?ontology_annotation_property != dc:source && ?ontology_annotation_property != rdf:type)
 
 }
