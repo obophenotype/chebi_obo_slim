@@ -6,7 +6,7 @@ on:
 jobs:
   pr_slim:
     runs-on: ubuntu-latest
-    container: obolibrary/odklite:v1.2.30
+    container: obolibrary/odklite:v1.3.1
     strategy:
       max-parallel: 1
     steps:
