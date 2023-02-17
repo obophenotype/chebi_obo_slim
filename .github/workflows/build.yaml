@@ -5,15 +5,22 @@ on:
 #    - cron: "0 13 * * 1"
 jobs:
   pr_slim:
-    runs-on: ubuntu-latest
-    container: obolibrary/odklite:v1.3.1
+    runs-on: macos-latest
     strategy:
       max-parallel: 1
     steps:
+      - uses: docker-practice/actions-setup-docker@master
+        if: steps.check.outputs.triggered == 'true'
+      - run: |
+          set -x
+          docker version
+        if: steps.check.outputs.triggered == 'true'
+      - name: Install ODK
+        run: docker pull obolibrary/odklite
       - name: Checkout main branch
         uses: actions/checkout@v2
       - name: Build PRO slim
-        run: make all
+        run: docker run -v $PWD/:/work -w /work -e ROBOT_JAVA_ARGS='-Xmx9G' -e JAVA_OPTS='-Xmx9G' --rm obolibrary/odklite make all
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
