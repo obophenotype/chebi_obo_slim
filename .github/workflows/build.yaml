@@ -10,11 +10,9 @@ jobs:
       max-parallel: 1
     steps:
       - uses: docker-practice/actions-setup-docker@master
-        if: steps.check.outputs.triggered == 'true'
       - run: |
           set -x
           docker version
-        if: steps.check.outputs.triggered == 'true'
       - name: Install ODK
         run: docker pull obolibrary/odklite
       - name: Checkout main branch
