@@ -29,3 +29,14 @@ Open a an issue on the [issue tracker](https://github.com/obophenotype/chebi_obo
 1. After a single approval, merge
 1. Make a GitHub release with the usual OBO tag (i.e. v2022-09-21)
 
+Note that running the `sh odk.sh make all` command above will forcefully
+refresh the local CHEBI mirror by downloading the latest available
+version of CHEBI. If that is not desired (if for some reasons you want
+to make a new release based on the exact same version as a previous
+release, _without_ updating to a more recent CHEBI), you may call that
+command as `sh odk.sh make all MIR=false`. You may only do that if you
+also ran the previous release. If the previous release was made by
+someone else, you _must_ ensure that you are using a version of CHEBI
+that is at least as recent as the one used for the last release, and the
+easiest way to ensure that is to always get the latest version (which is
+the default behaviour, when you do not use `MIR=false`).
