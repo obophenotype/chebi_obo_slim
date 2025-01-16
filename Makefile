@@ -6,14 +6,21 @@ VERSION=                    $(TODAY)
 ANNOTATE_ONTOLOGY_VERSION = annotate -V $(ONTBASE)/releases/$(VERSION)/$@ --annotation owl:versionInfo $(VERSION)
 
 MIR=                        true
+CLEAN_FILES=                chebi.owl.gz chebi.owl
 
-mirror/chebi.owl:
-	if [ $(MIR) = true ]; then curl -L $(URIBASE)/chebi.owl.gz --create-dirs -o mirror/chebi.owl.gz --retry 4 --max-time 200 && $(ROBOT) convert -i mirror/chebi.owl.gz -o $@.tmp.owl && mv $@.tmp.owl $@; fi
+ifeq ($(MIR),true)
+mirror/chebi.owl.gz: clean
+	curl -L $(URIBASE)/chebi.owl.gz --create-dirs -o $@ --retry 4 --max-time 200
+.PRECIOUS: mirror/chebi.owl.gz
+endif
+
+mirror/chebi.owl: mirror/chebi.owl.gz
+	$(ROBOT) convert -i $< -o $@
 .PRECIOUS: mirror/chebi.owl
 
-mirror/chebi.owl.gz:
-	if [ $(MIR) = true ]; then curl -L $(URIBASE)/chebi.owl.gz --create-dirs -o $@ --retry 4 --max-time 200; fi
-.PRECIOUS: mirror/chebi.owl.gz
+clean:
+	rm -f $(foreach file, $(CLEAN_FILES), mirror/$(file))
+.PHONY: clean
 
 chebi_slim.owl: mirror/chebi.owl seed.txt
 	$(ROBOT) extract -i $< -T seed.txt --force true --copy-ontology-annotations true --individuals include --method BOT \
@@ -23,6 +30,6 @@ chebi_slim.owl: mirror/chebi.owl seed.txt
 
 chebi_slim.obo: chebi_slim.owl
 	$(ROBOT) convert --input $< --check false -f obo -o $@.tmp.obo && grep -v ^owl-axioms $@.tmp.obo > $@ && rm $@.tmp.obo
-.PRECIOUS: chebi_slim.obo.obo
+.PRECIOUS: chebi_slim.obo
 
 all: chebi_slim.owl chebi_slim.obo
