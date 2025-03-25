@@ -2,7 +2,6 @@ TODAY ?=                    $(shell date +%Y-%m-%d)
 URIBASE=                    http://purl.obolibrary.org/obo
 ONTBASE=                    $(URIBASE)/chebi/obophenotype
 ROBOT=                      robot
-VERSION=                    $(TODAY)
 ANNOTATE_ONTOLOGY_VERSION = annotate -V $(ONTBASE)/releases/$(VERSION)/$@ --annotation owl:versionInfo $(VERSION)
 
 MIR=                        true
@@ -24,8 +23,8 @@ clean:
 
 chebi_slim.owl: mirror/chebi.owl seed.txt
 	$(ROBOT) extract -i $< -T seed.txt --force true --copy-ontology-annotations true --individuals include --method BOT \
-		query --update sparql/inject-subset-declaration.ru --update sparql/inject-synonymtype-declaration.ru --update sparql/postprocess-module.ru \
-		annotate --ontology-iri $(ONTBASE)/$@ $(ANNOTATE_ONTOLOGY_VERSION) convert -f ofn --output $@.tmp.owl && mv $@.tmp.owl $@
+		query --update sparql/preprocess-module.ru --update sparql/inject-subset-declaration.ru --update sparql/inject-synonymtype-declaration.ru --update sparql/postprocess-module.ru \
+		convert -f ofn --output $@.tmp.owl && mv $@.tmp.owl $@
 .PRECIOUS: chebi_slim.owl
 
 chebi_slim.obo: chebi_slim.owl
