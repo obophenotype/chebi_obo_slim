@@ -40,3 +40,7 @@ someone else, you _must_ ensure that you are using a version of CHEBI
 that is at least as recent as the one used for the last release, and the
 easiest way to ensure that is to always get the latest version (which is
 the default behaviour, when you do not use `MIR=false`).
+
+## External Ontology Term Requests
+
+If you need terms from other OBO ontologies (like OBA, GO, etc.) that complement your use of CHEBI terms, see [external-term-requests.md](external-term-requests.md) for guidance on how to request them and track active requests.
