@@ -1,27 +1,49 @@
-name: Create a PRO slim
+name: Update release files on seed change (PR)
+
 on:
-  workflow_dispatch:
-#  schedule:
-#    - cron: "0 13 * * 1"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - seed.txt
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  pr_slim:
-    runs-on: macos-latest
+  build:
+    runs-on: ubuntu-latest
+    container: obolibrary/odkfull:v1.6
     strategy:
       max-parallel: 1
+
     steps:
-      - uses: docker-practice/actions-setup-docker@master
-      - run: |
-          set -x
-          docker version
-      - name: Install ODK
-        run: docker pull obolibrary/odklite
-      - name: Checkout main branch
-        uses: actions/checkout@v2
-      - name: Build PRO slim
-        run: docker run -v $PWD/:/work -w /work -e ROBOT_JAVA_ARGS='-Xmx9G' -e JAVA_OPTS='-Xmx9G' --rm obolibrary/odklite make all
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+      - name: Check out PR branch
+        uses: actions/checkout@v4
         with:
-          commit-message: Update PRO slim
-          title: 'Update PRO slim'
-          assignees: matentzn
+          # Ensures we’re on the PR source branch so we can push back to it
+          ref: ${{ github.head_ref }}
+          # We need full history for commits
+          fetch-depth: 0
+
+      - name: Work around permission issue
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build
+        working-directory: src/ontology
+        run: make all
+
+      - name: Commit & push changes to PR branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update release files after seed change"
+          file_pattern: .
+          branch: ${{ github.head_ref }}
+
+      # Optional: add a PR comment so curators know it ran
+      - name: Comment on PR
+        if: ${{ success() }}
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            ✅ Built from updated `seed.txt` and pushed artifacts to this PR.
