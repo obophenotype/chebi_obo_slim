@@ -1,0 +1,38 @@
+name: Release CHEBI slim (draft)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'chebi_slim.owl'
+      - 'chebi_slim.obo'
+
+permissions:
+  contents: write  # needed to create the tag & release
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute tag (Europe/Athens date)
+        id: vars
+        run: |
+          TAG="v$(TZ=Europe/Athens date +%F)"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "release_name=CHEBI slim $TAG" >> $GITHUB_OUTPUT
+
+      - name: Create draft release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: ${{ steps.vars.outputs.release_name }}
+          draft: true
+          files: |
+            chebi_slim.owl
+            chebi_slim.obo
