@@ -4,6 +4,7 @@ ONTBASE=                    $(URIBASE)/chebi/obophenotype
 ROBOT=                      robot
 VERSION=                    $(TODAY)
 ANNOTATE_ONTOLOGY_VERSION = annotate -V $(ONTBASE)/releases/$(VERSION)/$@ --annotation owl:versionInfo $(VERSION)
+RELEASE_ASSETS = chebi_slim.owl chebi_slim.obo
 
 MIR=                        true
 CLEAN_FILES=                chebi.owl.gz chebi.owl
@@ -32,4 +33,12 @@ chebi_slim.obo: chebi_slim.owl
 	$(ROBOT) convert --input $< --check false -f obo -o $@.tmp.obo && grep -v ^owl-axioms $@.tmp.obo > $@ && rm $@.tmp.obo
 .PRECIOUS: chebi_slim.obo
 
-all: chebi_slim.owl chebi_slim.obo
+.PHONY: all
+all: $(RELEASE_ASSETS)
+
+.PHONY: public_release
+public_release:
+	@test $(GHVERSION)
+	ls -alt $(RELEASE_ASSETS)
+	gh auth login
+	gh release create $(GHVERSION) --title "$(VERSION)" --draft $(RELEASE_ASSETS) --generate-notes
