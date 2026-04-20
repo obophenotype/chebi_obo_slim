@@ -10,4 +10,4 @@
 #
 # See README-editors.md for more details.
 
-docker run -e ROBOT_JAVA_ARGS='-Xmx6G' -e JAVA_OPTS='-Xmx6G' -v $PWD/:/work -w /work --rm -ti obolibrary/odklite "$@"
+docker run -e ROBOT_JAVA_ARGS='-Xmx6G' -e JAVA_OPTS='-Xmx6G' -v $PWD/:/work -w /work --rm -ti obolibrary/odkfull:v1.6.1 "$@"
