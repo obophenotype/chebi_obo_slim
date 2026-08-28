@@ -3,11 +3,15 @@ URIBASE=                    http://purl.obolibrary.org/obo
 ONTBASE=                    $(URIBASE)/chebi/obophenotype
 ROBOT=                      robot
 VERSION=                    $(TODAY)
-ANNOTATE_ONTOLOGY_VERSION = annotate -V $(ONTBASE)/releases/$(VERSION)/$@ --annotation owl:versionInfo $(VERSION)
 RELEASE_ASSETS = chebi_slim.owl chebi_slim.obo
 
 MIR=                        true
 CLEAN_FILES=                chebi.owl.gz chebi.owl
+
+# Warning: When switching to ODK 1.7, this declaration will need to be
+# updated to point to $(ODK_RESOURCES_DIR)/robot/plugins.
+ROBOT_PLUGINS_DIRECTORY=    /tools/robot-plugins
+export ROBOT_PLUGINS_DIRECTORY
 
 ifeq ($(MIR),true)
 mirror/chebi.owl.gz: clean
@@ -23,15 +27,22 @@ clean:
 	rm -f $(foreach file, $(CLEAN_FILES), mirror/$(file))
 .PHONY: clean
 
-chebi_slim.owl: mirror/chebi.owl seed.txt
-	$(ROBOT) extract -i $< -T seed.txt --force true --copy-ontology-annotations true --individuals include --method BOT \
-		query --update sparql/inject-subset-declaration.ru --update sparql/inject-synonymtype-declaration.ru --update sparql/postprocess-module.ru \
-		annotate --ontology-iri $(ONTBASE)/$@ $(ANNOTATE_ONTOLOGY_VERSION) convert -f ofn --output $@.tmp.owl && mv $@.tmp.owl $@
-.PRECIOUS: chebi_slim.owl
+chebi_slim.owl chebi_slim.obo &: mirror/chebi.owl seed.txt
+	$(ROBOT) annotate --input $< --remove-annotations \
+	         odk:normalize --add-source true \
+	         extract --term-file seed.txt --force true \
+	                 --method BOT --individuals include \
+	                 --copy-ontology-annotations true \
+	         odk:normalize --subset-decls true --synonym-decls true \
+	         annotate --ontology-iri $(ONTBASE)/chebi_slim.owl \
+	                  --version-iri $(ONTBASE)/releases/$(VERSION)/chebi_slim.owl \
+	                  --annotation owl:versionInfo $(VERSION) \
+	         convert --format ofn --output chebi_slim.owl \
+	         convert --format obo --check false \
+	                 --clean-obo "strict drop-untranslatable-axioms" \
+	                 --output chebi_slim.obo
 
-chebi_slim.obo: chebi_slim.owl
-	$(ROBOT) convert --input $< --check false -f obo -o $@.tmp.obo && grep -v ^owl-axioms $@.tmp.obo > $@ && rm $@.tmp.obo
-.PRECIOUS: chebi_slim.obo
+.PRECIOUS: chebi_slim.owl chebi_slim.obo
 
 .PHONY: all
 all: $(RELEASE_ASSETS)
