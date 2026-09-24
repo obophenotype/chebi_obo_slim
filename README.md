@@ -11,7 +11,7 @@ A slimmed down version of CHEBI sufficient to cover 99% of the term needs across
 
 1. Make a Pull request on https://github.com/obophenotype/chebi_obo_slim/blob/main/seed.txt. In the PR, indicate which terms you are adding (at least the ids) and for which ontology.
 2. If you are a member of obophenotype organisation:
-   - You should make sure seed.txt is sorted alphanumerically
+   - You should make sure seed.txt is sorted alphanumerically by running `python scripts/sort.py`
    - Merge the changes without review at your own discretion
 3. If you are not a member of obophenotype organisation:
    - Wait until a member of obophenotype deals with your PR
